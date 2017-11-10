@@ -20,6 +20,8 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "GroupsockHelper.hh"
 #include "BasicUsageEnvironment.hh"
 #include <iostream>
+#include <ctime>
+#include <iomanip>
 
 static unsigned const maxPacketSize = 65536;
 static unsigned char packet[maxPacketSize+1];
@@ -30,6 +32,9 @@ int main(int argc, char** argv) {
   if (argc > 1) {
     sessionAddressStr = argv[1];
   }
+
+  // Time
+  std::time_t result;
 
   // Begin by setting up our usage environment:
   TaskScheduler* scheduler = BasicTaskScheduler::createNew();
@@ -53,8 +58,8 @@ int main(int argc, char** argv) {
   struct sockaddr_in fromAddress;
   while (inputGroupsock.handleRead(packet, maxPacketSize,
 				   packetSize, fromAddress)) {
-    std::cout << std::endl << "[packet from" << AddressString(fromAddress).val() << "(" << packetSize << "bytes)]" << std::endl;
-
+    result = std::time(nullptr);
+    std::cout << std::endl << "[packet from" << AddressString(fromAddress).val() << "(" << packetSize << "bytes) on " << std::put_time(std::localtime(&result),"%c %Z") << " (Unix time: " << result << ")]" << std::endl;
     // Ignore the first 8 bytes (SAP header).
     if (packetSize < 8) {
       *env << "Ignoring short packet from " << AddressString(fromAddress).val() << "%s!\n";
