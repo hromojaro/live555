@@ -15,24 +15,28 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 **********/
 // Copyright (c) 1996-2017, Live Networks, Inc.  All rights reserved
 // A program that receives and prints SDP/SAP announcements
-// (on the default SDP/SAP directory: 224.2.127.254/9875)
 
 #include "Groupsock.hh"
 #include "GroupsockHelper.hh"
 #include "BasicUsageEnvironment.hh"
-#include <stdio.h>
+#include <iostream>
 
 static unsigned const maxPacketSize = 65536;
 static unsigned char packet[maxPacketSize+1];
 
 int main(int argc, char** argv) {
+  // Argument checking
+  char const* sessionAddressStr = "224.2.127.254";	// Default
+  if (argc > 1) {
+    sessionAddressStr = argv[1];
+  }
+
   // Begin by setting up our usage environment:
   TaskScheduler* scheduler = BasicTaskScheduler::createNew();
   UsageEnvironment* env = BasicUsageEnvironment::createNew(*scheduler);
 
-
   // Create a 'groupsock' for the input multicast group,port:
-  char const* sessionAddressStr = "224.2.127.254";
+  //std::cout << "* Address: " << sessionAddressStr << std::endl;
   struct in_addr sessionAddress;
   sessionAddress.s_addr = our_inet_addr(sessionAddressStr);
 
@@ -49,7 +53,7 @@ int main(int argc, char** argv) {
   struct sockaddr_in fromAddress;
   while (inputGroupsock.handleRead(packet, maxPacketSize,
 				   packetSize, fromAddress)) {
-    printf("\n[packet from %s (%d bytes)]\n", AddressString(fromAddress).val(), packetSize);
+    std::cout << std::endl << "[packet from" << AddressString(fromAddress).val() << "(" << packetSize << "bytes)]" << std::endl;
 
     // Ignore the first 8 bytes (SAP header).
     if (packetSize < 8) {
@@ -66,7 +70,7 @@ int main(int argc, char** argv) {
     }
 
     packet[packetSize] = '\0'; // just in case
-    printf("%s", (char*)(packet+8));
+    std::cout << (char*)(packet+8);
   }
 
   return 0; // only to prevent compiler warning
