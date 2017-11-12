@@ -22,6 +22,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include <iostream>
 #include <ctime>
 #include <iomanip>
+using namespace std;
 
 static unsigned const maxPacketSize = 65536;
 static unsigned char packet[maxPacketSize+1];
@@ -34,14 +35,14 @@ int main(int argc, char** argv) {
   }
 
   // Time
-  std::time_t result;
+  time_t result;
 
   // Begin by setting up our usage environment:
   TaskScheduler* scheduler = BasicTaskScheduler::createNew();
   UsageEnvironment* env = BasicUsageEnvironment::createNew(*scheduler);
 
   // Create a 'groupsock' for the input multicast group,port:
-  //std::cout << "* Address: " << sessionAddressStr << std::endl;
+  //cout << "* Address: " << sessionAddressStr << endl;
   struct in_addr sessionAddress;
   sessionAddress.s_addr = our_inet_addr(sessionAddressStr);
 
@@ -58,8 +59,8 @@ int main(int argc, char** argv) {
   struct sockaddr_in fromAddress;
   while (inputGroupsock.handleRead(packet, maxPacketSize,
 				   packetSize, fromAddress)) {
-    result = std::time(nullptr);
-    std::cout << std::endl << "[packet from" << AddressString(fromAddress).val() << "(" << packetSize << "bytes) on " << std::put_time(std::localtime(&result),"%c %Z") << " (Unix time: " << result << ")]" << std::endl;
+    result = time(nullptr);
+    cout << endl << "[packet from" << AddressString(fromAddress).val() << "(" << packetSize << "bytes) on " << put_time(localtime(&result),"%c %Z") << " (Unix time: " << result << ")]" << endl;
     // Ignore the first 8 bytes (SAP header).
     if (packetSize < 8) {
       *env << "Ignoring short packet from " << AddressString(fromAddress).val() << "%s!\n";
@@ -75,7 +76,7 @@ int main(int argc, char** argv) {
     }
 
     packet[packetSize] = '\0'; // just in case
-    std::cout << (char*)(packet+8);
+    cout << (char*)(packet+8);
   }
 
   return 0; // only to prevent compiler warning
